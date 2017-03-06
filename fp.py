@@ -2,19 +2,21 @@
 # Author: Samuel McFalls
 # Description: See README.md
 
-from optparse import OptionParser
+import argparse
 
-parser = OptionParser()
-parser.add_option("-x", "--hex", help="Specifies that the input is in hex",
+parser = argparse.ArgumentParser(description="Converts DD2 Format FP <-> Decimal")
+parser.add_argument("value", metavar="VALUE", help="The value to convert from")
+base = parser.add_mutually_exclusive_group(required=True)
+base.add_argument("-x", "--hex", help="Specifies that VALUE is in hex",
                     action="store_true")
-parser.add_option("-b", "--bin", help="Specifies that the input is in binary",
+base.add_argument("-b", "--bin", help="Specifies that VALUE is in binary",
                     action="store_true")
-parser.add_option("-d", "--dec", help="Specifies that the input is in decimal",
+base.add_argument("-d", "--dec", help="Specifies that VALUE is in decimal",
                     action="store_true")
-parser.add_option("-f", "--file", dest="file",
-                    help="Reads input from FILENAME", metavar="FILENAME");
 
-(options, args) = parser.parse_args()
+args = parser.parse_args()
+
+print(args)
 
 # options is a dictionary of parameter-value pairs corresponding to the
 # switches or flags (eg -t test, -l). Flags are set to True.
