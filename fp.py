@@ -81,14 +81,16 @@ def decToFP(decVal):
     except:
         print("Error: VALUE is not valid")
 
-    sign = 1 if decVal < 0 else 0
-    print(sign)
+    if (decVal < 0):
+        sign = 1
+        decVal = abs(decVal)
+    else:
+        sign = 0
 
     # Determine the proper exponent
     # Iterate through, starting with -64 and ending with +63
     # It would be more efficient to start with 0 and check as in a binary
     # search, but I won't prematurely optimize
-
     prev = None
     exponent = None
     for exponent in range(-64, 64):
@@ -100,8 +102,6 @@ def decToFP(decVal):
                 break; # The value is less than 16^-64
     # If nothing is found, we must be at or above 16^63
 
-    print(exponent)
-
     # Determine the mantissa
     # Again, probably more effecient ways than using parse_bin, such as
     # keeping a running total, but I won't prematurely optimize
@@ -111,11 +111,23 @@ def decToFP(decVal):
         if (parse_bin("".join(mantissa)) * (16 ** exponent) > decVal):
             mantissa[bitNum + 2] = "0"
 
-    print(mantissa)
-
     expStr = bindigits(exponent, 7)
+    manStr = "".join(mantissa[2:])
+    manVal = parse_bin("".join(mantissa))
 
-    print(str(sign) + expStr + "".join(mantissa[2:]))
+    if (args.verbose):
+        signStr = "+ Positive" if (sign == 0) else "- Negative"
+        print("\nSign: " + signStr + " -> " + "1'b" + str(sign))
+        print("Exponent: " + str(exponent) + " -> " + "7'b" + expStr)
+        print("Mantissa: " + str(manVal) + " -> " + "24'b" + manStr)
+        print("(-1) ^ (" + str(sign) + ") * 16 ^ (" + str(exponent) + ") * "
+            + str(manVal) + " =")
+        dec = ((-1) ** sign) * (16 ** exponent) * manVal
+        print(dec)
+        error = abs(abs(dec) - abs(decVal)) / abs(decVal)
+        print("This calculation has error of " + str(error) + "\n")
+
+    print("32'b" + str(sign) + expStr + manStr)
 
 
 parser = argparse.ArgumentParser(description=
