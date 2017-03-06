@@ -6,6 +6,8 @@ import argparse
 from sys import exit
 from math import log10, floor
 
+args = None # Args available to all functions
+
 # From http://stackoverflow.com/a/9147327/3287359
 def twos_comp(val, bits):
     """compute the 2's compliment of int value val"""
@@ -34,7 +36,7 @@ def binToDec(binVal):
         print("Error: VALUE more than 32 bits")
         exit(1)
     if len(binVal) < 32:
-        binVal = binVal.zfill(32)
+        binVal = binVal.zfill(32) #TODO Sign extension
     try:
         sign = int(binVal[0]);
         exponent = twos_comp(int(binVal[1:8], 2), 7)
@@ -43,6 +45,13 @@ def binToDec(binVal):
         print("Error: VALUE is not valid")
         exit(1)
 
+    if (args.verbose):
+        signStr = "+ Positive" if (binVal[0] == "0") else "- Negative"
+        print("\nSign: 1'b" + binVal[0] + " -> " + signStr)
+        print("Exponent: 7'b" + binVal[1:8] + " -> " + str(exponent))
+        print("Mantissa: 24'b" + binVal[8:] + " -> " + str(mantissa))
+        print("(-1) ^ (" + str(sign) + ") * 16 ^ (" + str(exponent) + ") * "
+            + str(mantissa) + " =")
     dec = ((-1) ** sign) * (16 ** exponent) * mantissa
     decSigFigs = round_sig(dec, 6); # Six significant figures
     print(decSigFigs)
@@ -50,7 +59,8 @@ def binToDec(binVal):
 def decToFP(decVal):
     print("decToFP")
 
-parser = argparse.ArgumentParser(description="Converts DD2 Format FP <-> Decimal")
+parser = argparse.ArgumentParser(description=
+                                "Converts DD2 Format FP <-> Decimal")
 parser.add_argument("value", metavar="VALUE", help="The value to convert from")
 base = parser.add_mutually_exclusive_group(required=True)
 base.add_argument("-x", "--hex", help="Specifies that VALUE is in hex",
@@ -58,6 +68,8 @@ base.add_argument("-x", "--hex", help="Specifies that VALUE is in hex",
 base.add_argument("-b", "--bin", help="Specifies that VALUE is in binary",
                     action="store_true")
 base.add_argument("-d", "--dec", help="Specifies that VALUE is in decimal",
+                    action="store_true")
+parser.add_argument("-v", "--verbose", help="Enables more verbose output",
                     action="store_true")
 
 args = parser.parse_args()
