@@ -3,6 +3,16 @@
 # Description: See README.md
 
 import argparse
+from sys import exit
+
+def hexToDec(hex):
+    print("hexToDec")
+
+def binToDec(bin):
+    print("binToDec")
+
+def decToFP(dec):
+    print("decToFP")
 
 parser = argparse.ArgumentParser(description="Converts DD2 Format FP <-> Decimal")
 parser.add_argument("value", metavar="VALUE", help="The value to convert from")
@@ -16,10 +26,9 @@ base.add_argument("-d", "--dec", help="Specifies that VALUE is in decimal",
 
 args = parser.parse_args()
 
-print(args)
-
-# options is a dictionary of parameter-value pairs corresponding to the
-# switches or flags (eg -t test, -l). Flags are set to True.
-# args is a list of positional arguments
-
-# Determine the type of input (no conflicts allowed)
+if (args.hex):
+    hexToDec(args.value)
+elif (args.bin):
+    binToDec(args.value)
+elif (args.dec):
+    decToFP(args.value)
