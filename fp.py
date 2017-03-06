@@ -26,7 +26,7 @@ def round_sig(x, sig=2):
 
 def hexToDec(hexVal):
     try:
-        binToDec(bin(int(hexVal, 16))[2:].zfill(32))
+        binToDec(bin(int(hexVal, 16))[2:])
     except:
         print("Error: VALUE is not valid")
         exit(1)
@@ -36,7 +36,9 @@ def binToDec(binVal):
         print("Error: VALUE more than 32 bits")
         exit(1)
     if len(binVal) < 32:
-        binVal = binVal.zfill(32) #TODO Sign extension
+        binVal = binVal.zfill(32)
+        if (args.verbose):
+            print("\nPadded to " + binVal)
     try:
         sign = int(binVal[0]);
         exponent = twos_comp(int(binVal[1:8], 2), 7)
