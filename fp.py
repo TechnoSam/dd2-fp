@@ -15,6 +15,11 @@ def twos_comp(val, bits):
         val = val - (1 << bits)        # compute negative value
     return val
 
+# From http://stackoverflow.com/a/12946226/3287359
+def bindigits(n, bits):
+    s = bin(n & int("1"*bits, 2))[2:]
+    return ("{0:0>%s}" % (bits)).format(s)
+
 # From http://stackoverflow.com/a/13662978/3287359
 def parse_bin(s):
     t = s.split('.')
@@ -22,6 +27,11 @@ def parse_bin(s):
 
 # From http://stackoverflow.com/a/3413529/3287359
 def round_sig(x, sig=2):
+    if (x < 0):
+        x = -x
+        return -round(x, sig-int(floor(log10(x)))-1)
+    elif (x == 0):
+        return x
     return round(x, sig-int(floor(log10(x)))-1)
 
 def hexToDec(hexVal):
@@ -55,11 +65,58 @@ def binToDec(binVal):
         print("(-1) ^ (" + str(sign) + ") * 16 ^ (" + str(exponent) + ") * "
             + str(mantissa) + " =")
     dec = ((-1) ** sign) * (16 ** exponent) * mantissa
-    decSigFigs = round_sig(dec, 6); # Six significant figures
+    try:
+        decSigFigs = round_sig(dec, 6); # Six significant figures
+    except:
+        if (args.verbose):
+            print("\nWarning: Significant Figure conversion failed")
+        print(dec)
+        return
     print(decSigFigs)
 
 def decToFP(decVal):
-    print("decToFP")
+    # Convert to float and check the sign
+    try:
+        decVal = float(decVal)
+    except:
+        print("Error: VALUE is not valid")
+
+    sign = 1 if decVal < 0 else 0
+    print(sign)
+
+    # Determine the proper exponent
+    # Iterate through, starting with -64 and ending with +63
+    # It would be more efficient to start with 0 and check as in a binary
+    # search, but I won't prematurely optimize
+
+    prev = None
+    exponent = None
+    for exponent in range(-64, 64):
+        if decVal < 16 ** exponent:
+            if prev is not None:
+                if (decVal >= 16 ** prev):
+                    break;
+            else:
+                break; # The value is less than 16^-64
+    # If nothing is found, we must be at or above 16^63
+
+    print(exponent)
+
+    # Determine the mantissa
+    # Again, probably more effecient ways than using parse_bin, such as
+    # keeping a running total, but I won't prematurely optimize
+    mantissa = list("0.000000000000000000000000")
+    for bitNum in range(0, 24):
+        mantissa[bitNum + 2] = "1"
+        if (parse_bin("".join(mantissa)) * (16 ** exponent) > decVal):
+            mantissa[bitNum + 2] = "0"
+
+    print(mantissa)
+
+    expStr = bindigits(exponent, 7)
+
+    print(str(sign) + expStr + "".join(mantissa[2:]))
+
 
 parser = argparse.ArgumentParser(description=
                                 "Converts DD2 Format FP <-> Decimal")
